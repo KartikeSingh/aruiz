@@ -5,12 +5,16 @@ module.exports = model('aruiz_bot_user', new Schema({
     name: String,
     guild: String,
     items: [String],
-    points: {
-        type: Number,
-        default: 0
-    },
     balance: {
         type: Number,
         default: 0
     },
+    timeouts: {
+        type: Object,
+        default: {}
+    },
+    dailyStreak: {
+        type: Number,
+        default: 0
+    }
 }));
