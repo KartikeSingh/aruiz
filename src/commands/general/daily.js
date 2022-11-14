@@ -2,8 +2,8 @@ const users = require('../../models/user');
 
 module.exports = {
     data: {
-        name: "daily",
-        description: "Claim your daily reward",
+        name: "claim",
+        description: "claim your daily coins and build your streak",
         options: [],
     },
     timeout: 5000,

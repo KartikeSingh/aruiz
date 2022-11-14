@@ -3,7 +3,7 @@ const users = require('../../models/user');
 module.exports = {
     data: {
         name: "work",
-        description: "Do some work to make your living",
+        description: "Work for 1 hour and come back to claim your LB Coins",
         options: [],
     },
     timeout: 5000,

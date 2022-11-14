@@ -8,8 +8,8 @@ const fixIt = require('../../utility/fixIt');
 
 module.exports = {
     data: {
-        name: "items",
-        description: "Get items of a shop",
+        name: "unlock",
+        description: "list items available to unlock",
     },
 
     run: async (client, interaction) => {
