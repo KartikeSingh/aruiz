@@ -4,7 +4,7 @@ const user = require("../../models/user");
 
 module.exports = {
     data: {
-        name: "take-item",
+        name: "remove-item",
         description: "take item from a user",
         options: [{
             name: "user",

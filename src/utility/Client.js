@@ -17,7 +17,7 @@ module.exports = class Client extends Discord.Client {
         super(options);
 
         for (let i = 0; i < this.categories.length; i++) {
-            const commands = readdirSync(join(__dirname, `../commands/${this.categories[i]}`));
+            const commands = readdirSync(join(__dirname, `../commands/${this.categories[i]}`)).filter(x => x.endsWith(".js"));
         
             for (let j = 0; j < commands.length; j++) {
                 const command = require(`../commands/${this.categories[i]}/${commands[j]}`);
