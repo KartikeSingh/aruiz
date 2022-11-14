@@ -6,7 +6,11 @@ module.exports = {
     data: {
         name: "inventory",
         description: "Check your item's inventory",
-        options: [],
+        options: [{
+            name: "user",
+            type: 6,
+            description: "User who's inventory you want to see",
+        }],
     },
     timeout: "3000",
 
@@ -19,7 +23,9 @@ module.exports = {
             }]
         });
 
-        const userData = await user.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await user.create({ id: interaction.user.id, guild: interaction.guild.id });
+        const u = interaction.options.getUser("user") || interaction.user;
+
+        const userData = await user.findOne({ id: u.id, guild: interaction.guild.id }) || await user.create({ id: u.id, guild: interaction.guild.id });
 
         if (userData.items.length === 0) return interaction.editReply({
             embeds: [{
@@ -42,15 +48,15 @@ module.exports = {
 
             if (data) {
                 const string = `\`${i + 1}.\` **${data.name}**\n> Owned **${rawData[1]}**`;
-                
+
                 pages[ind] ? pages[ind].description += `\n\n${string}` : pages.push({
-                    title: "🎁 Inventory",
+                    title: `🎁 ${u.username}'s Inventory`,
                     description: string
                 });
             }
             else offset++;
         }
 
-        page(interaction, pages, { deleteMessage: false });
+        page(interaction, pages, { deleteMessage: false, editReply: true });
     }
 }
