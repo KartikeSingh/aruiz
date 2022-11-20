@@ -16,5 +16,17 @@ module.exports = model('aruiz_bot_user', new Schema({
     dailyStreak: {
         type: Number,
         default: 0
-    }
+    },
+    xp: {
+        type: Number,
+        default: 0
+    },
+    level: {
+        type: Number,
+        default: 0
+    },
+    lastXP: {
+        type: Number,
+        default: 0
+    },
 }));

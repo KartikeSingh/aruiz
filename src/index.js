@@ -11,7 +11,6 @@ const Client = require('./utility/Client');
 const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] });
 
 client.login(process.env.TOKEN);
-
 // Web Server Setup
 const express = require('express');
 
