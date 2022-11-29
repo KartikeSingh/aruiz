@@ -5,6 +5,8 @@ module.exports = model('aruiz_bot_user', new Schema({
     name: String,
     guild: String,
     items: [String],
+    wantTo: [String],
+    commitedTo: [String],
     balance: {
         type: Number,
         default: 0

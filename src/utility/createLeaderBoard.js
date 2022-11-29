@@ -10,7 +10,6 @@ const starSize = 30;
 if (!GlobalFonts.has("Absolute Zero")) GlobalFonts.registerFromPath(join(__dirname, "./font.otf"), "Absolute Zero");
 
 module.exports = async (users) => {
-    users = [...users,...users,...users,...users,...users,...users]
     const card = new Canvas(1000, 800);
     const ctx = card.getContext("2d");
 
