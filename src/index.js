@@ -11,10 +11,13 @@ const Client = require('./utility/Client');
 const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] });
 
 client.login(process.env.TOKEN);
+
 // Web Server Setup
-const express = require('express');
-const user = require('./models/user');
 const { Canvas, loadImage } = require('@napi-rs/canvas')
+const user = require('./models/user');
+const express = require('express');
+const data = require('./models/data');
+const axios = require('axios');
 
 const app = express();
 
@@ -48,7 +51,7 @@ app.get('/user/:id/info', async (req, res) => {
         rank: data.rank,
         streak: data.dailyStreak,
         avatar: userData.displayAvatarURL({ format: 'png' }),
-        score: data.xp
+        score: data.xp || 0
     })
 });
 
@@ -137,6 +140,53 @@ app.post('/user/create', async (req, res) => {
     res.send({
         message: "User created",
     })
+});
+
+// Discord Login
+app.get('/login/discord', async (req, res) => {
+    if (!client.user) return res.send("Bot is loading, try again later!")
+
+    const { code } = req.query;
+
+    if (!code) return res.redirect(`https://discord.com/oauth2/authorize?client_id=${client.user.id}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&response_type=code&scope=identify%20email`);
+
+    const response = await axios.post(
+        `https://discord.com/api/oauth2/token?grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`,
+        `grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`,
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+
+            }
+        }
+    ).then(x => x.data).catch(e => e.response.data);
+
+    if (response.error) return res.send(response);
+
+    const _data = await axios.get(`https://discord.com/api/v10/users/@me`, {
+        headers: {
+            Authorization: `Bearer ${response.access_token}`
+        }
+    }).then(x => x.data).catch(e => e.response.data);
+
+    const { email } = _data;
+
+    if (!email) return res.send("Error: You didn't gave us access to check your email");
+
+    const botData = await data.findOne({ id: client.user.id }) || await data.create({ id: client.user.id });
+
+    if (botData.whitelist.includes(email)) res.send(`Error: You are already whitelisted. (email: ${email})`);
+    else {
+        await data.findOneAndUpdate({ id: client.user.id }, { $push: { whitelist: email } });
+
+        res.send(`You are whitelisted successfully. (email: ${email})`);
+    }
+});
+
+app.get('/emails', async (req, res) => {
+    const botData = await data.findOne({ id: client.user.id }) || await data.create({ id: client.user.id });
+
+    res.send(botData.whitelist)
 })
 
 app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
