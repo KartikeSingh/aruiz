@@ -2,6 +2,7 @@ require('dotenv').config();
 
 // Database Setup
 const mongoose = require('mongoose');
+const fetch = require('node-fetch');
 
 mongoose.connect(process.env.MONGO_URI).then(() => console.log("Database Connected")).catch((e) => console.log(e))
 
@@ -150,24 +151,25 @@ app.get('/login/discord', async (req, res) => {
 
     if (!code) return res.redirect(`https://discord.com/oauth2/authorize?client_id=${client.user.id}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&response_type=code&scope=identify%20email`);
 
-    const response = await axios.post(
-        `https://discord.com/api/oauth2/token?grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`,
-        `grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`,
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+    const response = await (await fetch(`https://discord.com/api/oauth2/token?grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`
+    })).json();
 
-            }
-        }
-    ).then(x => x.data).catch(e => e.response.data);
+    console.log(response)
 
     if (response.error) return res.send(response);
 
-    const _data = await axios.get(`https://discord.com/api/v10/users/@me`, {
+    const _data = await (await fetch(`https://discord.com/api/v10/users/@me`, {
         headers: {
             Authorization: `Bearer ${response.access_token}`
         }
-    }).then(x => x.data).catch(e => e.response.data);
+    })).json();
+
+    console.log(_data)
 
     const { email } = _data;
 

@@ -10,20 +10,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@altura/altura-js": "^1.0.9",
     "@napi-rs/canvas": "^0.1.30",
-    "@thirdweb-dev/sdk": "^3.6.3",
     "axios": "^1.2.0",
     "create-random-id": "^1.0.0",
     "discord-pagination-advanced": "^1.1.8",
     "discord.js": "^13.12.0",
     "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "mongoose": "^6.6.7",
-    "ms-prettify": "^1.4.0",
-    "passport": "^0.6.0",
-    "passport-twitter": "^1.0.4"
+    "ms-prettify": "^1.4.0"
   },
   "engines": {
     "node": "16.x.x"
