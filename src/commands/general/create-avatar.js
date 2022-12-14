@@ -25,6 +25,7 @@ module.exports = {
                 new MessageEmbed()
                     .setColor("RED")
                     .setTitle("❌ Invalid Model URL")
+                    .setImage("https://cdn.discordapp.com/attachments/723104565708324915/1052605263418495087/Group_1769271.png")
                     .setDescription("Get your avatar model url from [here](https://readyplayer.me/hub/avatars)")
             ]
         });
@@ -46,6 +47,7 @@ module.exports = {
                 new MessageEmbed()
                     .setColor("RED")
                     .setTitle("❌ Invalid Model URL")
+                    .setImage("https://cdn.discordapp.com/attachments/723104565708324915/1052605263418495087/Group_1769271.png")
                     .setDescription("Get your avatar model url from [here](https://readyplayer.me/hub/avatars)")
             ]
         });
@@ -61,11 +63,12 @@ module.exports = {
                 new MessageEmbed()
                     .setColor("RED")
                     .setTitle("❌ Invalid Model URL")
+                    .setImage("https://cdn.discordapp.com/attachments/723104565708324915/1052605263418495087/Group_1769271.png")
                     .setDescription("Get your avatar model url from [here](https://readyplayer.me/hub/avatars)")
             ]
         });
 
-        await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img }) || await avatar.create({ id: interaction.user.id, url: img })
+        await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }) || await avatar.create({ id: interaction.user.id, url: img , updatedAt: Date.now()})
 
         interaction.editReply({
             embeds: [
