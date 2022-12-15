@@ -4,13 +4,8 @@ const avatar = require("../../models/avatar")
 
 module.exports = {
     data: {
-        name: "avatar",
-        description: "View my avatar",
-        options: [ {
-            name: "create",
-            type: 1,
-            description: "Create a new avatar",
-        }],
+        name: "avatar-create",
+        description: "Create a new avatar",
     },
     timeout: 3000,
 
