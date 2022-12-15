@@ -28,6 +28,13 @@ app.use(express.json())
 app.get('/', (req, res) => res.sendStatus(200));
 
 app.get('/user/:id/info', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     const { id } = req.params;
 
     const userData = await client.users.fetch(id).catch(() => null);
@@ -60,6 +67,13 @@ app.get('/user/:id/info', async (req, res) => {
 });
 
 app.get('/user/:id/avatar', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     const { id } = req.params;
 
     const userData = await client.users.fetch(id).catch(() => null);
@@ -93,11 +107,18 @@ app.get('/user/:id/avatar', async (req, res) => {
 });
 
 app.get('/user/:id/avatar/update', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     const { id } = req.params;
 
     const userData = await client.users.fetch(id).catch(() => null);
 
-    
+
     if (!userData) return res.status(404).send({
         error: true,
         message: "User not found"
@@ -108,6 +129,13 @@ app.get('/user/:id/avatar/update', async (req, res) => {
 });
 
 app.post('/user/create', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     let { id, score, want, commited } = req.body || {};
 
     if (typeof id !== "string") return res.status(400).send({
@@ -169,9 +197,16 @@ app.post('/user/create', async (req, res) => {
 });
 
 app.get('/:email/signup', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     const email = req.params.email,
         data = await user.findOne({ email, guild: process.env.GUILD });
-        const userData = await client.users.fetch(data?.id).catch(() => null);
+    const userData = await client.users.fetch(data?.id).catch(() => null);
 
     if (!data || !userData) return res.status(404).send({
         error: true,
@@ -184,8 +219,8 @@ app.get('/:email/signup', async (req, res) => {
         rank: data.rank,
         streak: data.dailyStreak,
         score: data.xp || 0,
-        wantTo: ["Exercise","Study"],
-        commitedTo: ["Exercise","Study", "Gaming","Social Media"]
+        wantTo: ["Gain Muscle", "Lose Weight", "Both"],
+        commitedTo: ["1-3 days a week", "Study", "2-4 days a week", "3-6 days a week"]
     })
 })
 
@@ -213,10 +248,10 @@ app.get('/login/discord', async (req, res) => {
         }
     })).json();
 
-    
+
     const { email } = _data;
-    
-    await user.findOneAndUpdate({ id: _data.id, guild: process.env.GUILD }, { email }) || await user.create({ id: _data.id, guild: process.env.GUILD , email })
+
+    await user.findOneAndUpdate({ id: _data.id, guild: process.env.GUILD }, { email }) || await user.create({ id: _data.id, guild: process.env.GUILD, email })
 
     if (!email) return res.send("Error: You didn't gave us access to check your email");
 
@@ -231,6 +266,13 @@ app.get('/login/discord', async (req, res) => {
 });
 
 app.get('/emails', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
     const botData = await data.findOne({ id: client.user.id }) || await data.create({ id: client.user.id });
 
     res.send(botData.whitelist)

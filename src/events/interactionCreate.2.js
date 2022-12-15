@@ -1,24 +1,32 @@
 const axios = require("axios");
-const { MessageEmbed } = require("discord.js");
-const avatar = require("../../models/avatar");
+const { Modal, TextInputComponent, MessageActionRow, MessageEmbed } = require('discord.js');
+const avatar = require("../models/avatar");
 
-module.exports = {
-    data: {
-        name: "create-avatar",
-        description: "Create or edit your own avatar",
-        options: [{
-            name: "model",
-            type: 3,
-            description: "The model url (ends with .glb)",
-            required: true,
-        }],
-    },
-    timeout: 3000,
+module.exports = async (client, interaction) => {
+    if (!interaction.customId) return;
 
-    run: async (client, interaction) => {
-        await interaction.deferReply({ ephemeral: true });
+    const [type, id, index] = interaction.customId.split("-");
 
-        const model = interaction.options.getString("model");
+    if (type === "set") {
+        await interaction.showModal(new Modal({
+            customId: "setSubmit",
+            title: "Avatar Setup",
+            components: [
+                new MessageActionRow({
+                    components: [new TextInputComponent({
+                        customId: "model",
+                        label: "Model URL",
+                        placeholder: "model .gbl url",
+                        required: true,
+                        style: "SHORT"
+                    })]
+                })
+            ]
+        }))
+    } else if (type === "setSubmit") {
+        await interaction.deferReply({ ephemeral: true })
+
+        const model = interaction.fields.getTextInputValue("model");
 
         if (!model.endsWith(".glb")) return interaction.editReply({
             embeds: [
@@ -68,7 +76,7 @@ module.exports = {
             ]
         });
 
-        await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }) || await avatar.create({ id: interaction.user.id, url: img , updatedAt: Date.now()})
+        await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }) || await avatar.create({ id: interaction.user.id, url: img, updatedAt: Date.now() })
 
         interaction.editReply({
             embeds: [
