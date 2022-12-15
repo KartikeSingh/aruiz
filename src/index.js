@@ -19,6 +19,7 @@ const user = require('./models/user');
 const express = require('express');
 const data = require('./models/data');
 const axios = require('axios');
+const avatar = require('./models/avatar');
 
 const app = express();
 
@@ -46,12 +47,14 @@ app.get('/user/:id/info', async (req, res) => {
         message: "User Data not found"
     });
 
+    const avatarData = await avatar.findOne({ id: data.id });
+
     res.send({
         username: userData.username,
         coins: data.balance,
         rank: data.rank,
         streak: data.dailyStreak,
-        avatar: userData.displayAvatarURL({ format: 'png' }),
+        avatar: avatarData?.url || userData.displayAvatarURL({ format: 'png' }),
         score: data.xp || 0
     })
 });
@@ -66,11 +69,18 @@ app.get('/user/:id/avatar', async (req, res) => {
         message: "User not found"
     });
 
+    const avatarData = await avatar.findOne({ id: userData.id });
+
+    if (!avatarData) return res.status(404).send({
+        error: true,
+        message: "Avatar not found"
+    });
+
     const canvas = new Canvas(512, 512),
         ctx = canvas.getContext('2d');
 
     try {
-        ctx.drawImage(await loadImage(userData.displayAvatarURL({ format: 'png', size: 512 })), 0, 0, 512, 512);
+        ctx.drawImage(await loadImage(avatarData.url), 0, 0, 512, 512);
     } catch (e) {
         return res.status(404).send({
             error: true,
@@ -80,6 +90,21 @@ app.get('/user/:id/avatar', async (req, res) => {
 
     res.type('png')
     res.send(canvas.toBuffer('image/png'))
+});
+
+app.get('/user/:id/avatar/update', async (req, res) => {
+    const { id } = req.params;
+
+    const userData = await client.users.fetch(id).catch(() => null);
+
+    
+    if (!userData) return res.status(404).send({
+        error: true,
+        message: "User not found"
+    });
+
+    const avatarData = await avatar.findOne({ id: userData.id });
+    res.send(new Date(avatarData?.updatedAt || 0));
 });
 
 app.post('/user/create', async (req, res) => {
@@ -143,6 +168,27 @@ app.post('/user/create', async (req, res) => {
     })
 });
 
+app.get('/:email/signup', async (req, res) => {
+    const email = req.params.email,
+        data = await user.findOne({ email, guild: process.env.GUILD });
+        const userData = await client.users.fetch(data?.id).catch(() => null);
+
+    if (!data || !userData) return res.status(404).send({
+        error: true,
+        message: "User not found"
+    });
+
+    res.send({
+        username: userData.username,
+        coins: data.balance,
+        rank: data.rank,
+        streak: data.dailyStreak,
+        score: data.xp || 0,
+        wantTo: ["Exercise","Study"],
+        commitedTo: ["Exercise","Study", "Gaming","Social Media"]
+    })
+})
+
 // Discord Login
 app.get('/login/discord', async (req, res) => {
     if (!client.user) return res.send("Bot is loading, try again later!")
@@ -159,8 +205,6 @@ app.get('/login/discord', async (req, res) => {
         body: `grant_type=authorization_code&client_id=${client.user.id}&client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&code=${code}`
     })).json();
 
-    console.log(response)
-
     if (response.error) return res.send(response);
 
     const _data = await (await fetch(`https://discord.com/api/v10/users/@me`, {
@@ -169,9 +213,10 @@ app.get('/login/discord', async (req, res) => {
         }
     })).json();
 
-    console.log(_data)
-
+    
     const { email } = _data;
+    
+    await user.findOneAndUpdate({ id: _data.id, guild: process.env.GUILD }, { email }) || await user.create({ id: _data.id, guild: process.env.GUILD , email })
 
     if (!email) return res.send("Error: You didn't gave us access to check your email");
 

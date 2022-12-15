@@ -5,5 +5,13 @@ module.exports = model('aruiz_bot_settings', new Schema({
     whitelist: {
         type: [String],
         default: []
-    }
+    },
+    wantTo: {
+        type: [String],
+        default: []
+    },
+    commitedTo: {
+        type: [String],
+        default: []
+    },
 }));
