@@ -6,24 +6,10 @@ module.exports = {
     data: {
         name: "avatar",
         description: "View my avatar",
-        options: [{
-            name: "set",
-            type: 1,
-            description: "Set your already made avatar",
-            options: [{
-                name: "model",
-                type: 3,
-                description: "The model url (ends with .glb)",
-                required: true,
-            }],
-        }, {
+        options: [ {
             name: "create",
             type: 1,
             description: "Create a new avatar",
-        }, {
-            name: "flex",
-            type: 1,
-            description: "Flex your avatar",
         }],
     },
     timeout: 3000,
@@ -32,28 +18,9 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true })
 
         const option = interaction.options.getSubcommand(),
-            user = interaction.user,
-            av = await avatar.findOne({ id: user.id });
+            user = interaction.user;
 
-        if (option === "flex") {
-            if (!av?.url) return interaction.editReply({
-                embeds: [
-                    new MessageEmbed()
-                        .setColor("RED")
-                        .setTitle("❌ No Avatar Setted")
-                ]
-            });
-
-            interaction.editReply({
-                embeds: [
-                    new MessageEmbed()
-                        .setColor("#FA00ff")
-                        .setTitle(`${user.username}`)
-                        .setURL(av.url)
-                        .setImage(av.url)
-                ]
-            });
-        } else if (option === "set") {
+        if (option === "set") {
             const model = interaction.options.getString("model");
 
             if (!model.endsWith(".glb")) return interaction.editReply({
@@ -121,7 +88,7 @@ module.exports = {
                         .setColor("WHITE")
                         .setTitle("📃 Avatar Model Tutorial")
                         .setImage("https://cdn.discordapp.com/attachments/723104565708324915/1052605263418495087/Group_1769271.png")
-                        .setDescription("- Go to [Ready Player Me](https://readyplayer.me/) to create and customize your avatar.\n- Once avatar has been created you will be prompted to claim your avatar.\n- Once Claimed > go to My Avatars > then copy .glb URL and paste here.")
+                        .setDescription("- Go to [Ready Player Me](https://readyplayer.me/) to create and customize your avatar.\n- Once avatar has been created you will be prompted to claim your avatar.\n- Once Claimed, go to My Avatars > then copy .glb URL and paste here.")
                 ],
                 components: [
                     new MessageActionRow({
@@ -129,7 +96,7 @@ module.exports = {
                             new MessageButton({
                                 customId: "set-" + interaction.user.id,
                                 style: "PRIMARY",
-                                label: "Set"
+                                label: "Upload Avatar"
                             })
                         ]
                     })
