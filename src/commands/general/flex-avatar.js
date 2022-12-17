@@ -18,31 +18,6 @@ module.exports = {
     timeout: 3000,
 
     run: async (client, interaction) => {
-        await interaction.deferReply({});
-
-        const user = interaction.user,
-            av = await avatar.findOne({ id: user.id });
-
-        if (!av?.url) return interaction.editReply({
-            embeds: [
-                new MessageEmbed()
-                    .setColor("RED")
-                    .setTitle("❌ No Avatar Setted")
-            ]
-        });
-
-        const ind = roles.filter(v => interaction.member.roles.cache.has(v.v))[0]?.index,
-        level = name[ind] || "\u200b";
-
-        interaction.editReply({
-            embeds: [
-                new MessageEmbed()
-                    .setColor("#FA00ff")
-                    .setTitle(`${user.username}`)
-                    .setURL(av.url)
-                    .setImage(av.url)
-                    .setDescription(level)
-            ]
-        });
+      
     }
 }
