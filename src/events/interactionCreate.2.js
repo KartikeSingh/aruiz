@@ -1,6 +1,7 @@
 const axios = require("axios");
-const { Modal, TextInputComponent, MessageActionRow, MessageEmbed } = require('discord.js');
+const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton } = require('discord.js');
 const avatar = require("../models/avatar");
+const users = require("../models/user");
 
 const roles = ["1032705263154765824", "1032705446420684850", "1032705920637087804", "1032682130280550411", "1032706161721491516"].map((v, i) => {
     return {
@@ -99,6 +100,15 @@ module.exports = async (client, interaction) => {
                     .setDescription(level)
 
             ]
+        });
+
+        client.channels.cache.get(client.oracle)?.send({
+            embeds: [{
+                description: `${interaction.user.toString()} just updated their avatar`,
+                image: {
+                    url: img
+                }
+            }]
         })
     } else if (type === "flex") {
         await interaction.deferReply({ ephemeral: true });
@@ -111,6 +121,7 @@ module.exports = async (client, interaction) => {
                 new MessageEmbed()
                     .setColor("RED")
                     .setTitle("❌ No Avatar Setted")
+                    .setDescription("Create your avatar in <#1052988278321717309>")
             ]
         });
 
@@ -120,23 +131,96 @@ module.exports = async (client, interaction) => {
         interaction.editReply({
             embeds: [
                 new MessageEmbed()
-                    .setColor("#FA00ff")
-                    .setTitle(`${user.username}`)
-                    .setURL(av.url)
-                    .setImage(av.url)
-                    .setDescription(level)
+                    .setColor("#3ba55b")
+                    .setTitle(`✅ Avatar Flexed Successfully`)
+
             ]
         });
 
         interaction.guild.channels.cache.get("1052968945533059202")?.send({
             embeds: [
                 new MessageEmbed()
-                    .setColor("#FA00ff")
+                    .setColor("#3ba55b")
                     .setTitle(`${user.username}`)
                     .setURL(av.url)
                     .setImage(av.url)
                     .setDescription(level)
-            ]
+            ],
+            components: [new MessageActionRow({
+                components: [
+                    new MessageButton({
+                        style: "SUCCESS",
+                        customId: 'flex',
+                        label: "Click here to flex your avatar",
+                    })
+                ]
+            })]
+        });
+
+        client.channels.cache.get(client.oracle)?.send({
+            embeds: [{
+                description: `${interaction.user.toString()} just flexed their avatar in <#1052968945533059202>`,
+            }]
         })
+    } else if (type === "coins") {
+        await interaction.deferReply({ ephemeral: true });
+
+        const guildData = await users.findOne({ guild: interaction.guildId, id: interaction.user.id }) || await users.create({ guild: interaction.guildId, id: interaction.user.id, name: interaction.member.displayName });
+
+        interaction.editReply({
+            embeds: [{
+                color: "RANDOM",
+                title: `🎭 ${interaction.user.username}'s Balance`,
+                description: (guildData.balance || 0) + " Points"
+            }]
+        });
+    } else if (type === "work") {
+        await interaction.deferReply({ ephemeral: true });
+
+        const user = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        if (user.timeouts.work > Date.now()) return interaction.editReply({
+            embeds: [{
+                color: "RED",
+                title: "⏰ Timeout",
+                description: `You can work again <t:${Math.floor(user.timeouts.work / 1000)}:R>`
+            }]
+        });
+
+        const max = 100, min = 20, reward = Math.floor(Math.random() * (max - min) + min);
+
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.work": Date.now() + 3600000 }, { new: true });
+
+        interaction.editReply({
+            embeds: [{
+                color: "RANDOM",
+                title: "⚒️ Worked Successfully",
+                description: `You earned \`${reward}\` 🪙, you can work again <t:${Math.floor(newData.timeouts.work / 1000)}:R>`
+            }]
+        });
+    } else if (type === "daily") {
+        await interaction.deferReply({ ephemeral: true });
+
+        const user = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        if (user.timeouts.daily > Date.now()) return interaction.editReply({
+            embeds: [{
+                color: "RED",
+                title: "⏰ Timeout",
+                description: `You can claim daily reward again <t:${Math.floor(user.timeouts.daily / 1000)}:R>`
+            }]
+        });
+
+        const max = 300, min = 200, reward = Math.floor(Math.random() * (max - min) + min) + (5 * user.dailyStreak);
+
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1 }, { new: true });
+
+        interaction.editReply({
+            embeds: [{
+                color: "RANDOM",
+                title: "💰 Daily Reward Claimed",
+                description: `You earned \`${reward}\` 🪙 and now you have a streak of **${newData.dailyStreak}** 🔥, you can claim your daily again <t:${Math.floor(newData.timeouts.daily / 1000)}:R>`
+            }]
+        });
     }
 }
