@@ -19,8 +19,8 @@ module.exports = {
 
         const u = interaction.options.getUser("user") || interaction.user,
             data = await user.findOne({ guild: interaction.guild.id, id: u.id }) || await user.create({ guild: interaction.guild.id, id: u.id });
-console.log(data)
-        data.name = u.username;
+
+            data.name = u.username;
         data.avatar = u.displayAvatarURL();
         data.requiredXp = 100;
 

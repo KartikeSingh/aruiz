@@ -1,7 +1,8 @@
 const axios = require("axios");
-const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton } = require('discord.js');
+const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton, MessageAttachment } = require('discord.js');
 const avatar = require("../models/avatar");
 const users = require("../models/user");
+const createAvatar = require("../utility/createAvatar");
 
 const roles = ["1032705263154765824", "1032705446420684850", "1032705920637087804", "1032682130280550411", "1032706161721491516"].map((v, i) => {
     return {
@@ -88,7 +89,8 @@ module.exports = async (client, interaction) => {
         await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }) || await avatar.create({ id: interaction.user.id, url: img, updatedAt: Date.now() })
 
         const ind = roles.filter(v => interaction.member.roles.cache.has(v.v))[0]?.index,
-            level = name[ind] || "\u200b";
+            level = name[ind] || "\u200b",
+            data = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id });
 
         interaction.editReply({
             embeds: [
@@ -97,7 +99,7 @@ module.exports = async (client, interaction) => {
                     .setImage(img)
                     .setTitle(`${interaction.user.username}`)
                     .setURL(img)
-                    .setDescription(level)
+                    .setDescription(`${level}\n**Pound Score: \`${data?.xp}\`** `)
 
             ]
         });
@@ -114,7 +116,19 @@ module.exports = async (client, interaction) => {
         await interaction.deferReply({ ephemeral: true });
 
         const user = interaction.user,
-            av = await avatar.findOne({ id: user.id });
+            av = await avatar.findOne({ id: user.id }),
+            datas = (await users.findOne({ guild: interaction.guild.id }).sort({ xp: -1 }).lean()).map((v, i) => {
+                v.rank = i + 1;
+
+                return v;
+            }),
+            data = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        data.avatar = user.displayAvatarURL({ dynamic: false });
+        data.requiredXp = 100;
+        data.rank = data.rank || datas.length;
+
+        for (let i = 1; i <= data.level; i++)data.requiredXp += 5 * (i ^ 2) + (50 * i) + 100;
 
         if (!av?.url) return interaction.editReply({
             embeds: [
@@ -124,9 +138,6 @@ module.exports = async (client, interaction) => {
                     .setDescription("Create your avatar in <#1052988278321717309>")
             ]
         });
-
-        const ind = roles.filter(v => interaction.member.roles.cache.has(v.v))[0]?.index,
-            level = name[ind] || "\u200b";
 
         interaction.editReply({
             embeds: [
@@ -140,21 +151,19 @@ module.exports = async (client, interaction) => {
         interaction.guild.channels.cache.get("1052968945533059202")?.send({
             embeds: [
                 new MessageEmbed()
-                    .setColor("#3ba55b")
-                    .setTitle(`${user.username}`)
-                    .setURL(av.url)
-                    .setImage(av.url)
-                    .setDescription(level)
+                    .setColor("#5b63f3")
+                    .setImage("attachment://avatar.png")
             ],
             components: [new MessageActionRow({
                 components: [
                     new MessageButton({
-                        style: "SUCCESS",
+                        style: "PRIMARY",
                         customId: 'flex',
-                        label: "Click here to flex your avatar",
+                        label: "Click to flex your avatar",
                     })
                 ]
-            })]
+            })],
+            files: [new MessageAttachment(await createAvatar(user, av, data), "avatar.png")]
         });
 
         client.channels.cache.get(client.oracle)?.send({

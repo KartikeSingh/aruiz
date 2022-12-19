@@ -77,8 +77,8 @@ module.exports = {
                 channel.send({
                     embeds: [{
                         color: "#3ba55b",
-                        title: "Interact With Oracle Bot",
-                        description: "Use the buttons below to interact with the bot!",
+                        title: "Interact With Oracle",
+                        description: "Use the buttons below to interact with Oracle!",
                     }, {
                         color: "#3ba55b",
                         image: {
@@ -90,17 +90,17 @@ module.exports = {
                             new MessageButton({
                                 customId: "coins",
                                 style: "SUCCESS",
-                                label: "coins",
+                                label: "My Balance",
                             }),
                             new MessageButton({
                                 customId: "work",
                                 style: "SUCCESS",
-                                label: "work",
+                                label: "Work",
                             }),
                             new MessageButton({
                                 customId: "daily",
                                 style: "SUCCESS",
-                                label: "daily",
+                                label: "Claim",
                             })
                         ]
                     })]
