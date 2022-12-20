@@ -117,7 +117,7 @@ module.exports = async (client, interaction) => {
 
         const user = interaction.user,
             av = await avatar.findOne({ id: user.id }),
-            datas = (await users.findOne({ guild: interaction.guild.id }).sort({ xp: -1 }).lean()).map((v, i) => {
+            datas = (await users.find({ guild: interaction.guild.id }).sort({ xp: -1 }).lean()).map((v, i) => {
                 v.rank = i + 1;
 
                 return v;
