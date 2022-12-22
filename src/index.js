@@ -279,3 +279,5 @@ app.get('/emails', async (req, res) => {
 })
 
 app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
+
+client.vNames = ["Members: {count}", "Avatars: {count}", "Whitelisted: {count}"]

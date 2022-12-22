@@ -28,7 +28,7 @@ module.exports = async (user, avatar, data) => {
     // xp
     ctx.textAlign = "right";
     ctx.font = '9px "Inter Light"';
-    ctx.fillText(`Daily XP: ${data.xp}/${data.requiredXp}`, 300, 65);
+    ctx.fillText(`Daily XP: ${data.xp || 0}/${data.requiredXp}`, 300, 65);
 
     // Level
     ctx.textAlign = "left";
@@ -37,7 +37,7 @@ module.exports = async (user, avatar, data) => {
     ctx.font = '10px "Inter Light"';
     ctx.fillText(`RANK`, 13, 27);
 
-    ctx.font = '9px "Absolute Zero"';
+    ctx.font = '10px "Absolute Zero"';
     ctx.fillText(`POUND SCORE`, 205, 20);
 
     ctx.font = '27px "Inter Regular"';
@@ -45,13 +45,13 @@ module.exports = async (user, avatar, data) => {
 
     ctx.fillStyle = "#FA00ff";
     ctx.font = '10px "Inter Light"';
-    ctx.fillText(`LEVEL`, 94, 27);
+    ctx.fillText(`LEVEL`, 96, 27);
 
     ctx.font = '27px "Inter Regular"';
-    ctx.fillText(`${data.level || 0}`, 126, 30);
-    ctx.font = '28px "Absolute Zero"';
+    ctx.fillText(`${data.level || 0}`, 128, 30);
+    ctx.font = '26px "Absolute Zero"';
     const score = (data.xp || 0) > 500 ? 500 : data.xp || 0;
-    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 206, 42);
+    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 205, 42);
 
     // Bar
     ctx.lineJoin = "round";
@@ -83,7 +83,7 @@ module.exports = async (user, avatar, data) => {
     ctx.strokeRect(
         19,
         74,
-        ((data.xp || 10) / data.requiredXp) * 280,
+        ((data.xp || 0) / data.requiredXp) * 280,
         1
     );
 
