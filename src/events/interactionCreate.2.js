@@ -86,27 +86,34 @@ module.exports = async (client, interaction) => {
             ]
         });
 
-        await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }) || await avatar.create({ id: interaction.user.id, url: img, updatedAt: Date.now() })
+        const old = await avatar.findOne({ id: interaction.user.id });
+        const av = await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }, { new: true }) || await avatar.create({ id: interaction.user.id, url: img, updatedAt: Date.now() })
 
-        const ind = roles.filter(v => interaction.member.roles.cache.has(v.v))[0]?.index,
-            level = name[ind] || "\u200b",
-            data = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id });
+        const user = interaction.user,
+            datas = (await users.find({ guild: interaction.guild.id }).sort({ xp: -1 }).lean()).map((v, i) => {
+                v.rank = i + 1;
 
+                return v;
+            }),
+            data = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        data.avatar = user.displayAvatarURL({ dynamic: false });
+        data.requiredXp = 100;
+        data.rank = data.rank || datas.length;
+
+        for (let i = 1; i <= data.level; i++)data.requiredXp += 5 * (i ^ 2) + (50 * i) + 100;
         interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setColor("#FA00ff")
-                    .setImage(img)
-                    .setTitle(`${interaction.user.username}`)
-                    .setURL(img)
-                    .setDescription(`${level}\n**Pound Score: \`${data?.xp}\`** `)
-
-            ]
+                    .setImage("attachment://avatar.png")
+            ],
+            files: [new MessageAttachment(await createAvatar(user, av, data), "avatar.png")]
         });
 
         client.channels.cache.get(client.oracle)?.send({
             embeds: [{
-                description: `${interaction.user.toString()} just updated their avatar`,
+                description: `${interaction.user.toString()} ${(!old || !old?.url) ? "created their very first avatar!" : "updated their avatar!"}`,
                 image: {
                     url: img
                 }

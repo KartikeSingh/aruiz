@@ -40,15 +40,17 @@ module.exports = async (user, avatar, data) => {
     ctx.font = '10px "Absolute Zero"';
     ctx.fillText(`POUND SCORE`, 205, 20);
 
-    ctx.font = '27px "Inter Regular"';
-    ctx.fillText(`#${data.rank || 0}`, 45, 30);
+    ctx.font = '26px "Inter Regular"';
+    ctx.fillText(`#${data.rank || 0}`, 44, 30);
+
+    let y = data.rank < 100 ? 0 : 20;
 
     ctx.fillStyle = "#FA00ff";
     ctx.font = '10px "Inter Light"';
-    ctx.fillText(`LEVEL`, 96, 27);
+    ctx.fillText(`LEVEL`, 100 + y, 27);
 
     ctx.font = '27px "Inter Regular"';
-    ctx.fillText(`${data.level || 0}`, 128, 30);
+    ctx.fillText(`${data.level || 0}`, 132 + y, 30);
     ctx.font = '26px "Absolute Zero"';
     const score = (data.xp || 0) > 500 ? 500 : data.xp || 0;
     ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 205, 42);

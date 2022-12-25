@@ -9,7 +9,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => console.log("Database Connect
 // Discord Client Setup
 const Client = require('./utility/Client');
 
-const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] });
+const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MEMBERS"] });
 
 client.login(process.env.TOKEN);
 
@@ -20,6 +20,7 @@ const express = require('express');
 const data = require('./models/data');
 const axios = require('axios');
 const avatar = require('./models/avatar');
+const poundHistory = require('./models/poundHistory');
 
 const app = express();
 
@@ -104,6 +105,64 @@ app.get('/user/:id/avatar', async (req, res) => {
 
     res.type('png')
     res.send(canvas.toBuffer('image/png'))
+});
+
+app.get('/user/:id/score', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
+    const { id } = req.params;
+
+    const userData = await client.users.fetch(id).catch(() => null);
+
+    if (!userData) return res.status(404).send({
+        error: true,
+        message: "User not found"
+    });
+
+    const data = await user.findOne({ id }) || await user.create({ id }),
+        d = new Date(),
+        history = await poundHistory.findOne({ id: id }) || await poundHistory.create({ id: id, data: [{ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore }] });
+
+    res.send({
+        previous_scores: history.data,
+        current_score: {
+            score: data.poundScore
+        }
+    })
+});
+
+app.post('/user/score/update', async (req, res) => {
+    const auth = req.headers.authorization;
+
+    if (auth !== process.env.API_KEY) return res.status(403).send({
+        error: true,
+        message: "Invalid API key"
+    });
+
+    const { discord_user_id: id, pound_score_modification: change, score_modification_timesamp: time } = req.body;
+
+    const userData = await client.users.fetch(id).catch(() => null);
+
+    if (!userData) return res.status(404).send({
+        error: true,
+        message: "User not found"
+    });
+
+    const data = await user.findOneAndUpdate({ id }, { $inc: { poundScore: change } }, { new: true }) || await user.create({ id, poundScore: change }),
+        d = new Date(time),
+        history = await poundHistory.findOneAndUpdate({ id: id }, { $push: { data: { date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore } } }, { new: true }) || await poundHistory.create({ id: id, data: [{ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore }] });
+
+    res.send({
+        previous_scores: history.data,
+        current_score: {
+            score: data.poundScore
+        }
+    })
 });
 
 app.get('/user/:id/avatar/update', async (req, res) => {

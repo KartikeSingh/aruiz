@@ -35,5 +35,9 @@ module.exports = model('aruiz_bot_user', new Schema({
     dailyXp: {
         type: Number,
         default: 0
-    }
+    },
+    poundScore: {
+        type: Number,
+        default: 0
+    },
 }));

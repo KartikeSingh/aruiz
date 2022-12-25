@@ -23,7 +23,7 @@ module.exports = async (client, message) => {
         const r = data.levelReward[userData.level], role = message.guild.roles.cache.get(r),
             channel = message.guild.channels.cache.get(data.xpLevelUp.channel) || message.channel;
 
-        if (r !==undefined) {
+        if (r !== undefined) {
             message.member.roles.add(role, `Level reward for reaching ${userData.level} level`).then(() => {
                 reply(data.levelRewardMessage.success, channel, message, userData, data, role)
             }).catch(() => {
