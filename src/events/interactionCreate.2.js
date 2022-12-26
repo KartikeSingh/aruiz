@@ -4,13 +4,7 @@ const avatar = require("../models/avatar");
 const users = require("../models/user");
 const createAvatar = require("../utility/createAvatar");
 
-const roles = ["1032705263154765824", "1032705446420684850", "1032705920637087804", "1032682130280550411", "1032706161721491516"].map((v, i) => {
-    return {
-        index: i,
-        v
-    }
-});
-const name = ["LV. 5", "LV. 4", "LV. 3", "LV. 2", "LV. 1"];
+const timeout = new Map();
 
 module.exports = async (client, interaction) => {
     if (!interaction.customId) return;
@@ -120,6 +114,17 @@ module.exports = async (client, interaction) => {
             }]
         })
     } else if (type === "flex") {
+        if(timeout.get(interaction.user.id) > Date.now())return interaction.reply({
+            embeds: [{
+                color:"RED",
+                title:"⏰ Timeout",
+                description:`You can flex your avatar again <t:${ Math.floor(timeout.get(interaction.user.id)/1000) }:R>`
+            }],
+            ephemeral: true
+        });
+
+        timeout.set(interaction.user.id, Date.now() + 600000)
+
         await interaction.deferReply({ ephemeral: true });
 
         const user = interaction.user,
