@@ -6,54 +6,95 @@ if (!GlobalFonts.has("Inter Light")) GlobalFonts.registerFromPath(join(__dirname
 if (!GlobalFonts.has("Inter Regular")) GlobalFonts.registerFromPath(join(__dirname, "./Inter-Regular.ttf"), "Inter Regular");
 if (!GlobalFonts.has("Inter Medium")) GlobalFonts.registerFromPath(join(__dirname, "./Inter-Medium.ttf"), "Inter Medium");
 
+const roles = ["1056677083604066445", "1056674165110882305", "1056335558856687766", "1056334675209097216", "1056334670083674112", "1056334664480075866", "1056334648063565864", "1056334659522404412", "1056333900131078214", "1056333897660633218", "1056333855671451698", "1056333825472483370", "1056333384412037184"].map((v, i) => {
+    return {
+        i,
+        v
+    }
+}),
+    names = ["Pounder", "OG Alpha", "Alpha", "Deca", "Nona", "Octa", "Hepta", "Hexa", "Penta", "Tetra", "Tri", "Di", "Mono"];
+
+let capule;
+
+loadImage("https://cdn.discordapp.com/attachments/723104565708324915/1056907306064957470/badge_purple_2_2.png").then(x => {
+    capule = x;
+});
+
 module.exports = async (user, avatar, data) => {
-    const card = new Canvas(325, 396);
+    const card = new Canvas(325, 410);
     const ctx = card.getContext("2d");
+
     ctx.fillStyle = "black"
     ctx.fillRect(0, 0, card.width, card.height)
 
     const av = await loadImage(avatar?.url).catch(() => null);
 
-    if (av) ctx.drawImage(av, 13, 95, 293, 295);
+    if (av) ctx.drawImage(av, 13, 108, 293, 295);
 
     // Username & Avatar
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = '15px "Inter Medium"';
-    ctx.fillText(
-        user.username,
-        15,
-        65
-    );
+
+    const l = 8;
+    const username = user.username;
+
+    if (username.length < 14) {
+        const s = username.length <= 8 ? "24" : username.length < 12 ? "20" : "14";
+        ctx.font = s + 'px "Absolute Zero"';
+
+        ctx.fillText(
+            username,
+            15,
+            25
+        );
+    } else {
+        const names = [username.slice(0,12),username.slice(12)]
+
+        ctx.font = '14px "Absolute Zero"';
+
+        ctx.fillText(
+            names[0],
+            15,
+            20
+        );
+        ctx.fillText(
+            names[1],
+            15,
+            35
+        );
+    }
 
     // xp
     ctx.textAlign = "right";
     ctx.font = '9px "Inter Light"';
-    ctx.fillText(`Daily XP: ${data.xp || 0}/${data.requiredXp}`, 300, 65);
+    ctx.fillText(`Daily XP: ${data.xp || 0}/${data.requiredXp}`, 300, 82);
 
     // Level
     ctx.textAlign = "left";
     ctx.fillStyle = "#FFFFFF";
 
     ctx.font = '10px "Inter Light"';
-    ctx.fillText(`RANK`, 13, 27);
+    ctx.fillText(`RANK`, 15, 58);
 
     ctx.font = '10px "Absolute Zero"';
-    ctx.fillText(`POUND SCORE`, 205, 20);
+    ctx.fillText(`POUND SCORE`, 200, 39);
 
-    ctx.font = '26px "Inter Regular"';
-    ctx.fillText(`#${data.rank || 0}`, 44, 30);
+    ctx.font = '24px "Inter Regular"';
+    ctx.fillText(`#${data.rank || 0}`, 49, 58);
 
-    let y = data.rank < 100 ? 0 : 20;
+    const level = roles.filter(v => user.roles.cache.has(v.v))[0]?.i,
+        name = names[level] || "None";
+
+    ctx.font = '10px "Inter Light"';
+    ctx.fillText(`LEVEL`, 15, 82);
 
     ctx.fillStyle = "#FA00ff";
-    ctx.font = '10px "Inter Light"';
-    ctx.fillText(`LEVEL`, 100 + y, 27);
-
-    ctx.font = '27px "Inter Regular"';
-    ctx.fillText(`${data.level || 0}`, 132 + y, 30);
+    ctx.font = '24px "Inter Regular"';
+    ctx.fillText(name, 50, 82);
     ctx.font = '26px "Absolute Zero"';
     const score = (data.xp || 0) > 500 ? 500 : data.xp || 0;
-    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 205, 42);
+    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 210, 25);
+
+    ctx.drawImage(capule, 290, 45)
 
     // Bar
     ctx.lineJoin = "round";
@@ -62,13 +103,13 @@ module.exports = async (user, avatar, data) => {
     ctx.strokeStyle = "#494B4E";
     ctx.fillRect(
         19,
-        74,
+        93,
         280,
         1
     );
     ctx.strokeRect(
         19,
-        74,
+        93,
         280,
         1
     );
@@ -78,13 +119,13 @@ module.exports = async (user, avatar, data) => {
     ctx.strokeStyle = "#FA00ff";
     ctx.fillRect(
         19,
-        74,
+        93,
         ((data.xp || 0) / data.requiredXp) * 280,
         1
     );
     ctx.strokeRect(
         19,
-        74,
+        93,
         ((data.xp || 0) / data.requiredXp) * 280,
         1
     );

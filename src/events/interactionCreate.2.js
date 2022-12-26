@@ -91,6 +91,7 @@ module.exports = async (client, interaction) => {
             }),
             data = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
 
+        user.roles = interaction.guild.members.cache.get(interaction.user.id)?.roles;
         data.avatar = user.displayAvatarURL({ dynamic: false });
         data.requiredXp = 100;
         data.rank = data.rank || datas.length;
@@ -136,6 +137,7 @@ module.exports = async (client, interaction) => {
             }),
             data = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
 
+        user.roles = interaction.guild.members.cache.get(interaction.user.id)?.roles;
         data.avatar = user.displayAvatarURL({ dynamic: false });
         data.requiredXp = 100;
         data.rank = data.rank || datas.length;

@@ -21,6 +21,7 @@ module.exports = {
 
         data.avatar = user.displayAvatarURL({ dynamic: false });
         data.requiredXp = 100;
+        user.roles = interaction.guild.members.cache.get(interaction.user.id)?.roles;
 
         for (let i = 1; i <= data.level; i++)data.requiredXp += 5 * (i ^ 2) + (50 * i) + 100;
 
