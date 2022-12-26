@@ -92,9 +92,8 @@ module.exports = async (user, avatar, data) => {
     ctx.fillText(name, 50, 82);
     ctx.font = '26px "Absolute Zero"';
     const score = (data.xp || 0) > 500 ? 500 : data.xp || 0;
-    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 210, 25);
+    ctx.fillText(`${"0".repeat(4 - score.toString().length)}${score}`, 200, 25);
 
-    ctx.drawImage(capule, 290, 45)
 
     // Bar
     ctx.lineJoin = "round";

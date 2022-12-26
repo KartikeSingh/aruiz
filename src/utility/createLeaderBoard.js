@@ -4,7 +4,7 @@ const { join } = require('path');
 const calcPercentage = require("./calcPercentage");
 const drawCircleAvatar = require("./drawCircleAvatar");
 
-const stars = ["https://media.discordapp.net/attachments/1040099075015589979/1043542030724370512/Screen_Shot_2022-11-12_at_8.21_2_2.png", "https://media.discordapp.net/attachments/1040099075015589979/1043542109380169838/Screen_Shot_2022-11-12_at_8.21_5_1.png", "https://media.discordapp.net/attachments/1040099075015589979/1043542176992346132/Screen_Shot_2022-11-12_at_8.21_7_1.png"];
+// const stars = ["https://media.discordapp.net/attachments/1040099075015589979/1043542030724370512/Screen_Shot_2022-11-12_at_8.21_2_2.png", "https://media.discordapp.net/attachments/1040099075015589979/1043542109380169838/Screen_Shot_2022-11-12_at_8.21_5_1.png", "https://media.discordapp.net/attachments/1040099075015589979/1043542176992346132/Screen_Shot_2022-11-12_at_8.21_7_1.png"];
 const starSize = 30;
 
 if (!GlobalFonts.has("Absolute Zero")) GlobalFonts.registerFromPath(join(__dirname, "./font.otf"), "Absolute Zero");
@@ -48,15 +48,10 @@ module.exports = async (users) => {
         ctx.fillStyle = "#fcfcfc";
         ctx.font = '17px "Arial"';
 
-        if (i < 3) {
-            if (typeof stars[i] === "string") stars[i] = await loadImage(stars[i]);
+        ctx.fillText(`${i + 1}`, calcPercentage(card, 11, "w"), calcPercentage(card, y2, "h"));
 
-            ctx.drawImage(stars[i], calcPercentage(card, 11, "w") -starSize/3 , calcPercentage(card, y2, "h") - starSize, starSize, starSize)
-        }
-        else ctx.fillText(`${i + 1}`, calcPercentage(card, 11, "w"), calcPercentage(card, y2, "h"));
-
-        const user = users[i],
-            av = await loadImage(user.avatar).catch(e => console.log(e));
+        const user = users[i];
+        const av = await loadImage(user.avatar).catch(e => console.log(e));
 
         if (av) drawCircleAvatar(ctx,
             calcPercentage(card, 20, "w"),

@@ -221,6 +221,14 @@ module.exports = async (client, interaction) => {
                 description: `You earned \`${reward}\` 🪙, you can work again <t:${Math.floor(newData.timeouts.work / 1000)}:R>`
             }]
         });
+
+        client.oc?.send({
+            embeds: [{
+                color: "RANDOM",
+                title: `⚒️ ${interaction.user.username} Worked Successfully`,
+                description: `They earned \`${reward}\` 🪙 from doing the work!`
+            }]
+        }).catch(() => {})
     } else if (type === "daily") {
         await interaction.deferReply({ ephemeral: true });
 
@@ -242,8 +250,16 @@ module.exports = async (client, interaction) => {
             embeds: [{
                 color: "RANDOM",
                 title: "💰 Daily Reward Claimed",
-                description: `You earned \`${reward}\` 🪙 and now you have a streak of **${newData.dailyStreak}** 🔥, you can claim your daily again <t:${Math.floor(newData.timeouts.daily / 1000)}:R>`
+                description: `You recived \`${reward}\` 🪙 and now you have a streak of **${newData.dailyStreak}** 🔥, you can claim your daily again <t:${Math.floor(newData.timeouts.daily / 1000)}:R>`
             }]
         });
+
+        client.oc?.send({
+            embeds: [{
+                color: "RANDOM",
+                title: `💰 ${interaction.user.username} Claimed Daily Reward`,
+                description: `They recived \`${reward}\` 🪙 and now they have a streak of **${newData.dailyStreak}** 🔥`
+            }]
+        }).catch(() => {})
     }
 }

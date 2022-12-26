@@ -5,5 +5,7 @@ module.exports = async (client) => {
 
     client.application.commands.set(client.commands.map(v => v.data));
 
-    statsUpdate(client)
+    statsUpdate(client);
+
+    client.oc = client.channels.cache.get(process.env.ORACLE);
 }

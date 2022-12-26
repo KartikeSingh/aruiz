@@ -64,6 +64,7 @@ const itemSchema = new Schema({
         type: Object,
         default: {}
     },
+    leaderboard:[String]
 })
 
 module.exports = model("Guild_Config_aruiz", itemSchema);
