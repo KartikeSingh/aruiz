@@ -5,6 +5,8 @@ if (!GlobalFonts.has("Absolute Zero")) GlobalFonts.registerFromPath(join(__dirna
 if (!GlobalFonts.has("Inter Light")) GlobalFonts.registerFromPath(join(__dirname, "./Inter-Light.ttf"), "Inter Light");
 if (!GlobalFonts.has("Inter Regular")) GlobalFonts.registerFromPath(join(__dirname, "./Inter-Regular.ttf"), "Inter Regular");
 if (!GlobalFonts.has("Inter Medium")) GlobalFonts.registerFromPath(join(__dirname, "./Inter-Medium.ttf"), "Inter Medium");
+if (!GlobalFonts.has("SF PRO")) GlobalFonts.registerFromPath(join(__dirname, "./sf-pro-text-bold.ttf"), "SF PRO");
+
 
 const roles = ["1056677083604066445", "1056674165110882305", "1056335558856687766", "1056334675209097216", "1056334670083674112", "1056334664480075866", "1056334648063565864", "1056334659522404412", "1056333900131078214", "1056333897660633218", "1056333855671451698", "1056333825472483370", "1056333384412037184"].map((v, i) => {
     return {
@@ -34,34 +36,20 @@ module.exports = async (user, avatar, data) => {
     // Username & Avatar
     ctx.fillStyle = "#FFFFFF";
 
-    const l = 8;
-    const username = user.username;
+    const username = [user.username.slice(0, 15), user.username.slice(15)];
 
-    if (username.length < 14) {
-        const s = username.length <= 8 ? "24" : username.length < 12 ? "20" : "14";
-        ctx.font = s + 'px "Absolute Zero"';
+    ctx.font = '15px "SF PRO"';
 
-        ctx.fillText(
-            username,
-            15,
-            25
-        );
-    } else {
-        const names = [username.slice(0,12),username.slice(12)]
-
-        ctx.font = '14px "Absolute Zero"';
-
-        ctx.fillText(
-            names[0],
-            15,
-            20
-        );
-        ctx.fillText(
-            names[1],
-            15,
-            35
-        );
-    }
+    ctx.fillText(
+        username[0],
+        15,
+        20
+    );
+    ctx.fillText(
+        username[1],
+        15,
+        35
+    );
 
     // xp
     ctx.textAlign = "right";
