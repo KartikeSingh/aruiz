@@ -2,6 +2,7 @@ const { MessageEmbed } = require("discord.js");
 const avatar = require("../../models/avatar");
 const datax = require("../../models/data");
 const stats = require("../../models/stats");
+const getFollowers = require("../../utility/getFollowers");
 
 module.exports = {
     data: {
@@ -35,6 +36,9 @@ module.exports = {
                 }, {
                     name: "whitelist",
                     value: 2
+                }, {
+                    name: "followers",
+                    value: 3
                 }]
             }]
         }, {
@@ -75,7 +79,7 @@ module.exports = {
                 }]
             });
         } else if (option === "add") {
-            const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0)]
+            const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers()]
 
             channel.setName(client.vNames[type].replace("{count}", count[type]))
                 .then(async () => {

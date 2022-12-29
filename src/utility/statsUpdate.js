@@ -1,6 +1,7 @@
 const avatar = require("../models/avatar")
 const stats = require("../models/stats")
-const datax = require("../models/data")
+const datax = require("../models/data");
+const getFollowers = require("./getFollowers");
 
 module.exports = async function statsUpdate(client) {
     let channels = await stats.find(),
@@ -11,7 +12,7 @@ module.exports = async function statsUpdate(client) {
     channels.forEach(async data => {
         const channel = client.channels.cache.get(data.channel),
             memberCount = count.get(data.guild) || (await client.guilds.cache.get(data.guild).members.fetch()).size,
-            values = [memberCount, avatars, whitelisted];
+            values = [memberCount, avatars, whitelisted,, await getFollowers()];
 
         count.set(data.guild, memberCount);
 
@@ -22,5 +23,5 @@ module.exports = async function statsUpdate(client) {
 
     setTimeout(() => {
         statsUpdate(client)
-    }, 6000)
+    }, 10000)
 }
