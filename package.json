@@ -4,7 +4,13 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "node ."
+    "start": "pm2 start x",
+    "deploy": "pm2 start src/index.js --name x",
+    "logs": "pm2 logs x --lines 1000",
+    "stop": "pm2 stop x",
+    "delete": "pm2 delete x",
+    "restart": "pm2 restart x",
+    "git-start": "git pull origin master && npm run start && npm run logs"
   },
   "keywords": [],
   "author": "",
