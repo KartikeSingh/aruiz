@@ -115,11 +115,11 @@ module.exports = async (client, interaction) => {
             }]
         })
     } else if (type === "flex") {
-        if(timeout.get(interaction.user.id) > Date.now())return interaction.reply({
+        if (timeout.get(interaction.user.id) > Date.now()) return interaction.reply({
             embeds: [{
-                color:"RED",
-                title:"⏰ Timeout",
-                description:`You can flex your avatar again <t:${ Math.floor(timeout.get(interaction.user.id)/1000) }:R>`
+                color: "RED",
+                title: "⏰ Timeout",
+                description: `You can flex your avatar again <t:${Math.floor(timeout.get(interaction.user.id) / 1000)}:R>`
             }],
             ephemeral: true
         });
@@ -202,33 +202,37 @@ module.exports = async (client, interaction) => {
 
         const user = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
 
-        if (user.timeouts.work > Date.now()) return interaction.editReply({
+        if (user.claimWorkAt > Date.now()) return interaction.editReply({
             embeds: [{
                 color: "RED",
                 title: "⏰ Timeout",
-                description: `You can work again <t:${Math.floor(user.timeouts.work / 1000)}:R>`
+                description: `You have to claim your paycheck <t:${Math.floor(user.claimWorkAt / 1000)}:R>, by clicking **paycheck** button`
             }]
         });
-
-        const max = 100, min = 20, reward = Math.floor(Math.random() * (max - min) + min);
-
-        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.work": Date.now() + 3600000 }, { new: true });
+        else if (user.claimWorkAt !== 0 && user.claimWorkAt < Date.now()) return interaction.editReply({
+            embeds: [{
+                color: "RED",
+                title: "⏰ Timeout",
+                description: `Claim your paycheck via \`Paycheck\` button`
+            }]
+        });
 
         interaction.editReply({
             embeds: [{
                 color: "RANDOM",
-                title: "⚒️ Worked Successfully",
-                description: `You earned \`${reward}\` 🪙, you can work again <t:${Math.floor(newData.timeouts.work / 1000)}:R>`
-            }]
+                title: "⚒️ Select Work Hour ",
+                description: `${interaction.user.toString()}, , thank you for showing up to work today. working in The Compound consists of talking on chat. How many hours will you work today?`
+            }],
+            components: [
+                new MessageActionRow({
+                    components: [1, 2, 3, 4].map(hour => new MessageButton({
+                        customId: 'chooseHours-' + hour,
+                        label: `${hour} hour`,
+                        style: "PRIMARY",
+                    }))
+                })
+            ], fetchReply: true
         });
-
-        client.oc?.send({
-            embeds: [{
-                color: "RANDOM",
-                title: `⚒️ ${interaction.user.username} Worked Successfully`,
-                description: `They earned \`${reward}\` 🪙 from doing the work!`
-            }]
-        }).catch(() => {})
     } else if (type === "daily") {
         await interaction.deferReply({ ephemeral: true });
 
@@ -250,7 +254,7 @@ module.exports = async (client, interaction) => {
             embeds: [{
                 color: "RANDOM",
                 title: "💰 Daily Reward Claimed",
-                description: `You recived \`${reward}\` 🪙 and now you have a streak of **${newData.dailyStreak}** 🔥, you can claim your daily again <t:${Math.floor(newData.timeouts.daily / 1000)}:R>`
+                description: `${interaction.user.toString()} here is your daily bonus. You earned \`${reward}\` LB Coins`
             }]
         });
 
@@ -260,6 +264,55 @@ module.exports = async (client, interaction) => {
                 title: `💰 ${interaction.user.username} Claimed Daily Reward`,
                 description: `They recived \`${reward}\` 🪙 and now they have a streak of **${newData.dailyStreak}** 🔥`
             }]
-        }).catch(() => {})
+        }).catch(() => { })
+    } else if (type === "chooseHours") {
+        interaction.update({
+            embeds: [{
+                color: "GREEN",
+                title: `Thank you, Come back in ${id} hours to claim your paycheck`
+            }],
+            components:[]
+        });
+
+        await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: Date.now() + parseInt(id) * 3600000, workHour: parseInt(id) }, { new: true });
+    } else if (type === "paycheck") {
+        await interaction.deferReply({ ephemeral: true });
+
+        const user = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        if (!user.claimWorkAt) return interaction.editReply({
+            embeds: [{
+                color: "RED",
+                title: "⏰ Not Working",
+                description: `Click on \`work\` button to work before claiming a pay check`
+            }]
+        });
+
+        if (Date.now() < user.claimWorkAt) return interaction.editReply({
+            embeds: [{
+                color: "RED",
+                title: "⏰ Not Enough",
+                description: `You can claim your paycheck <t:${Math.floor(user.claimWorkAt / 1000)}:R>`
+            }]
+        });
+
+        const reward = 100;
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: 0, workHour: 0, $inc: { balance: reward } }, { new: true });
+
+        interaction.editReply({
+            embeds: [{
+                color: "RANDOM",
+                title: "💰 Paycheck Claimed",
+                description: `${interaction.user.toString()}, here is your paycheck for your last work. You earned **${reward}** LB Coins`
+            }]
+        });
+
+        client.oc?.send({
+            embeds: [{
+                color: "RANDOM",
+                title: `⚒️ ${interaction.user.username} Worked Successfully`,
+                description: `Claimed their paycheck of \`${reward}\` LB Coins!`
+            }]
+        }).catch(() => { })
     }
 }

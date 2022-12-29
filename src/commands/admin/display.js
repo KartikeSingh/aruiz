@@ -98,6 +98,11 @@ module.exports = {
                                 label: "Work",
                             }),
                             new MessageButton({
+                                customId: "paycheck",
+                                style: "SUCCESS",
+                                label: "Paycheck",
+                            }), 
+                            new MessageButton({
                                 customId: "daily",
                                 style: "SUCCESS",
                                 label: "Claim",

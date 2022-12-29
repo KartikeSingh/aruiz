@@ -40,4 +40,6 @@ module.exports = model('aruiz_bot_user', new Schema({
         type: Number,
         default: 0
     },
+    claimWorkAt:Number,
+    workHour:Number
 }));
