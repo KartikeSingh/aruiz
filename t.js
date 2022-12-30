@@ -1,3 +1,2 @@
-const getFollowers = require("./src/utility/getFollowers");
+require('dotenv').config();
 
-getFollowers().then(console.log)

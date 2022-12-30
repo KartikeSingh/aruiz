@@ -18,9 +18,9 @@ const { Canvas, loadImage } = require('@napi-rs/canvas')
 const user = require('./models/user');
 const express = require('express');
 const data = require('./models/data');
-const axios = require('axios');
 const avatar = require('./models/avatar');
 const poundHistory = require('./models/poundHistory');
+const getPoints = require('./utility/getPoints');
 
 const app = express();
 
@@ -126,14 +126,27 @@ app.get('/user/:id/score', async (req, res) => {
 
     const data = await user.findOne({ id }) || await user.create({ id }),
         d = new Date(),
-        history = await poundHistory.findOne({ id: id }) || await poundHistory.create({ id: id, data: [{ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore }] });
+        history = await poundHistory.findOne({ id: id }) || await poundHistory.create({ id: id, data: [{ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore }] }),
+        dates = [];
+
+    d.setDate(d.getDate() - 7 + (6 - d.getDay()))
+
+    while (dates.length < 8) {
+        dates.push(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`)
+        d.setDate(d.getDate() - 7);
+    }
 
     res.send({
-        previous_scores: history.data,
+        previous_scores: dates.map(v => {
+            return {
+                date: v,
+                score: getPoints(v, history.data)
+            }
+        }),
         current_score: {
             score: data.poundScore
         }
-    })
+    });
 });
 
 app.post('/user/score/update', async (req, res) => {
@@ -155,7 +168,13 @@ app.post('/user/score/update', async (req, res) => {
 
     const data = await user.findOneAndUpdate({ id }, { $inc: { poundScore: change } }, { new: true }) || await user.create({ id, poundScore: change }),
         d = new Date(time),
-        history = await poundHistory.findOneAndUpdate({ id: id }, { $push: { data: { date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore } } }, { new: true }) || await poundHistory.create({ id: id, data: [{ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore }] });
+        his = await poundHistory.findOne({ id }) || await poundHistory.create({ id }),
+        date = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+    his.data = his.data.filter(v => v.date !== date);
+    his.data.push({ date: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, score: data.poundScore });
+
+    const history = await poundHistory.findOneAndUpdate({ id }, { data: his.data }, { new: true });
 
     res.send({
         previous_scores: history.data,
@@ -340,3 +359,5 @@ app.get('/emails', async (req, res) => {
 app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
 
 client.vNames = ["Members: {count}", "Avatars: {count}", "Whitelisted: {count}", "Followers: {count}"]
+
+process.setMaxListeners(69);
