@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "node .",
+    "start": "pm2 start x",
     "deploy": "pm2 start src/index.js --name x",
     "logs": "pm2 logs x --lines 1000",
     "stop": "pm2 stop x",

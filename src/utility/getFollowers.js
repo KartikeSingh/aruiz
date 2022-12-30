@@ -11,6 +11,9 @@ module.exports = async (username = "BlockPound_") => {
             access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
         }, username).then(followers => {
             res(followers?.length || 0);
-        }).catch(() => res(0));
+        }).catch((e) => {
+            console.log(e);
+            res(0)
+        });
     })
 }

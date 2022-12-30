@@ -21,6 +21,7 @@ const data = require('./models/data');
 const avatar = require('./models/avatar');
 const poundHistory = require('./models/poundHistory');
 const getPoints = require('./utility/getPoints');
+const getFollowers = require('./utility/getFollowers');
 
 const app = express();
 
@@ -361,3 +362,5 @@ app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
 client.vNames = ["Members: {count}", "Avatars: {count}", "Whitelisted: {count}", "Followers: {count}"]
 
 process.setMaxListeners(69);
+
+getFollowers().then(console.log)
