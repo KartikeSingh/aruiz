@@ -285,7 +285,7 @@ module.exports = async (client, interaction) => {
             v.rank = i + 1;
 
             return v;
-        }), user = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+        }), user = datas.filter(v => v.id === interaction.user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
 
         user.rank = user.rank || datas.length;
 
@@ -307,8 +307,8 @@ module.exports = async (client, interaction) => {
 
         const min = 92, max = 302, p = 1 - user.rank / datas.length;
 
-        const rawReward = max * p,
-            reward = rawReward < min ? min : rawReward;
+        const rawReward = Math.round(max * p),
+            reward = (rawReward < min ? min : rawReward) * user.workHour;
         const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: 0, workHour: 0, $inc: { balance: reward } }, { new: true });
 
         interaction.editReply({
