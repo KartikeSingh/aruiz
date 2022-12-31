@@ -3,6 +3,7 @@ const avatar = require("../../models/avatar");
 const datax = require("../../models/data");
 const stats = require("../../models/stats");
 const getFollowers = require("../../utility/getFollowers");
+const botData = require("../../models/data");
 
 module.exports = {
     data: {
@@ -38,6 +39,9 @@ module.exports = {
                     value: 2
                 }, {
                     name: "followers",
+                    value: 3
+                }, {
+                    name: "unique avatars",
                     value: 3
                 }]
             }]
@@ -79,7 +83,7 @@ module.exports = {
                 }]
             });
         } else if (option === "add") {
-            const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers()]
+            const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers(), (await botData.findOne({ id: client.user.id }))?.avatarsCreated];
 
             channel.setName(client.vNames[type].replace("{count}", count[type]))
                 .then(async () => {
@@ -97,7 +101,7 @@ module.exports = {
                         ]
                     })
                 })
-                .catch( () => {
+                .catch(() => {
                     interaction.editReply({
                         embeds: [
                             new MessageEmbed()
@@ -106,8 +110,8 @@ module.exports = {
                         ]
                     })
                 })
-        }else if (option === "remove") {
-            if(!data.some(v => v.channel === channel.id))return interaction.editReply({
+        } else if (option === "remove") {
+            if (!data.some(v => v.channel === channel.id)) return interaction.editReply({
                 embeds: [{
                     title: "❌ Not A Stats Channel",
                     color: "RED"
@@ -129,7 +133,7 @@ module.exports = {
                         ]
                     })
                 })
-                .catch( () => {
+                .catch(() => {
                     interaction.editReply({
                         embeds: [
                             new MessageEmbed()

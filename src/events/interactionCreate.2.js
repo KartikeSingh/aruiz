@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton, MessageAttachment } = require('discord.js');
 const avatar = require("../models/avatar");
+const botData = require("../models/data");
 const users = require("../models/user");
 const createAvatar = require("../utility/createAvatar");
 
@@ -66,7 +67,7 @@ module.exports = async (client, interaction) => {
 
         const img = await axios.post("https://render.readyplayer.me/render", {
             model,
-            scene: "fullbody-portrait-v1",
+            scene: "fullbody-posture-v1-transparent",
             armature: gender === "feminine" ? "ArmatureTargetFemale" : "ArmatureTargetMale",
         }).then(x => x.data.renders[0]).catch((e) => console.log(e));
 
@@ -79,6 +80,8 @@ module.exports = async (client, interaction) => {
                     .setDescription("Get your avatar model url from [here](https://readyplayer.me/hub/avatars)")
             ]
         });
+
+        await botData.findOneAndUpdate({ id: client.user.id }, { $inc: { avatarsCreated: 1 } }) || await botData.create({ id: client.user.id, avatarsCreated: 1 });
 
         const old = await avatar.findOne({ id: interaction.user.id });
         const av = await avatar.findOneAndUpdate({ id: interaction.user.id }, { url: img, updatedAt: Date.now() }, { new: true }) || await avatar.create({ id: interaction.user.id, url: img, updatedAt: Date.now() })
@@ -246,7 +249,7 @@ module.exports = async (client, interaction) => {
             }]
         });
 
-        const max = 300, min = 200, reward = Math.floor(Math.random() * (max - min) + min) + (5 * user.dailyStreak);
+        const max = 52, min = 152, reward = Math.floor(Math.random() * (max - min) + min) + (5 * user.dailyStreak);
 
         const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1 }, { new: true });
 
@@ -271,14 +274,20 @@ module.exports = async (client, interaction) => {
                 color: "GREEN",
                 title: `Thank you, Come back in ${id} hours to claim your paycheck`
             }],
-            components:[]
+            components: []
         });
 
         await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: Date.now() + parseInt(id) * 3600000, workHour: parseInt(id) }, { new: true });
     } else if (type === "paycheck") {
         await interaction.deferReply({ ephemeral: true });
 
-        const user = await users.findOne({ id: interaction.user.id, guild: interaction.guild.id }) || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+        const datas = (await users.find({ guild: interaction.guild.id }).sort({ xp: -1 }).lean()).map((v, i) => {
+            v.rank = i + 1;
+
+            return v;
+        }), user = datas.filter(v => v.id === user.id)[0] || await users.create({ id: interaction.user.id, guild: interaction.guild.id });
+
+        user.rank = user.rank || datas.length;
 
         if (!user.claimWorkAt) return interaction.editReply({
             embeds: [{
@@ -296,7 +305,10 @@ module.exports = async (client, interaction) => {
             }]
         });
 
-        const reward = 100;
+        const min = 92, max = 302, p = 1 - user.rank / datas.length;
+
+        const rawReward = max * p,
+            reward = rawReward < min ? min : rawReward;
         const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: 0, workHour: 0, $inc: { balance: reward } }, { new: true });
 
         interaction.editReply({

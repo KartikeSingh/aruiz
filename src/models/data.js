@@ -14,4 +14,8 @@ module.exports = model('aruiz_bot_settings', new Schema({
         type: [String],
         default: []
     },
+    avatarsCreated: {
+        type: Number,
+        default: 0
+    }
 }));
