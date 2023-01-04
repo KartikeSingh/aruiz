@@ -109,14 +109,14 @@ module.exports = async (client, interaction) => {
             files: [new MessageAttachment(await createAvatar(user, av, data), "avatar.png")]
         });
 
-        client.channels.cache.get(client.oracle)?.send({
+        client.oracle.forEach(id => client.channels.cache.get(id)?.send({
             embeds: [{
                 description: `${interaction.user.toString()} ${(!old || !old?.url) ? "created their very first avatar!" : "updated their avatar!"}`,
                 image: {
                     url: img
                 }
             }]
-        })
+        }))
     } else if (type === "flex") {
         if (timeout.get(interaction.user.id) > Date.now()) return interaction.reply({
             embeds: [{
@@ -183,11 +183,11 @@ module.exports = async (client, interaction) => {
             files: [new MessageAttachment(await createAvatar(user, av, data), "avatar.png")]
         });
 
-        client.channels.cache.get(client.oracle)?.send({
+        client.oracle.forEach(id => client.channels.cache.get(id)?.send({
             embeds: [{
                 description: `${interaction.user.toString()} just flexed their avatar in <#1052968945533059202>`,
             }]
-        })
+        }))
     } else if (type === "coins") {
         await interaction.deferReply({ ephemeral: true });
 

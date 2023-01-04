@@ -21,7 +21,6 @@ const data = require('./models/data');
 const avatar = require('./models/avatar');
 const poundHistory = require('./models/poundHistory');
 const getPoints = require('./utility/getPoints');
-const getFollowers = require('./utility/getFollowers');
 
 const app = express();
 
@@ -359,6 +358,6 @@ app.get('/emails', async (req, res) => {
 
 app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
 
-client.vNames = ["Members: {count}", "Avatars: {count}", "Whitelisted: {count}", "Followers: {count}", "Unique Avatars: {count}"]
+client.vNames = ["Members: {count}", "Verified: {count}", "Whitelisted: {count}", "Followers: {count}", "Unique Avatars: {count}", "OG Capsule HLDR's:", "Capsule HLDR's:"]
 
 process.setMaxListeners(69);

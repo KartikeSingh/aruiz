@@ -13,8 +13,19 @@ module.exports = async function statsUpdate(client) {
 
     channels.forEach(async data => {
         const channel = client.channels.cache.get(data.channel),
-            memberCount = count.get(data.guild) || (await client.guilds.fetch(data.guild)).approximateMemberCount,
+            memberCount = count.get(data.guild) || (await client.guilds.fetch(data.guild).catch(() => { return {} })).approximateMemberCount,
             values = [memberCount, avatars, whitelisted, , await getFollowers(), botData.avatarsCreated];
+
+        if ((memberCount !== client.guilds.cache.get(data.guild).members.cache.size)) {
+            await client.guilds.cache.get(data.guild).members.fetch();
+        }
+
+        const g = client.guilds.cache.get(data.guild)
+
+        values.push(
+            g.members.cache.filter(v => v.roles.cache.has("1056674165110882305")),
+            g.members.cache.filter(v => v.roles.cache.has("1056335558856687766"))
+        );
 
         count.set(data.guild, memberCount);
 

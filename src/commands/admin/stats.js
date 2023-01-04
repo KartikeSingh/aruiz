@@ -42,7 +42,7 @@ module.exports = {
                     value: 3
                 }, {
                     name: "unique avatars",
-                    value: 3
+                    value: 4
                 }]
             }]
         }, {
@@ -83,7 +83,19 @@ module.exports = {
                 }]
             });
         } else if (option === "add") {
+
+            if ((memberCount !== client.guilds.cache.get(data.guild).members.cache.size)) {
+                await client.guilds.cache.get(data.guild).members.fetch();
+            }
+
+            const g = client.guilds.cache.get(data.guild)
+
             const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers(), (await botData.findOne({ id: client.user.id }))?.avatarsCreated];
+
+            count.push(
+                g.members.cache.filter(v => v.roles.cache.has("1056674165110882305")),
+                g.members.cache.filter(v => v.roles.cache.has("1056335558856687766"))
+            );
 
             channel.setName(client.vNames[type].replace("{count}", count[type]))
                 .then(async () => {

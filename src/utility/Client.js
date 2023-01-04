@@ -6,7 +6,7 @@ const Discord = require('discord.js');
 
 module.exports = class Client extends Discord.Client {
     owners = ["723049421021118535"];
-    oracle = "1038998321785733161";
+    oracle = ["1038998321785733161", "1059371016465432606"];
 
     events = readdirSync(join(__dirname, "../events"));
     categories = readdirSync(join(__dirname, "../commands"));
