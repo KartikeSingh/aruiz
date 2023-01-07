@@ -40,6 +40,15 @@ module.exports = model('aruiz_bot_user', new Schema({
         type: Number,
         default: 0
     },
-    claimWorkAt:Number,
-    workHour:Number
+    claimWorkAt: Number,
+    workHour: Number,
+    joinedAt: Number,
+    invitedBy: String,
+    verified: Boolean,
+    lastMessage: Number,
+    lastCommand: Number,
+    invited: {
+        type: [String],
+        default: []
+    },
 }));

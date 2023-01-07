@@ -358,6 +358,6 @@ app.get('/emails', async (req, res) => {
 
 app.listen(process.env.PORT || 3001, () => console.log(`Web Server Started!`));
 
-client.vNames = ["Members: {count}", "Verified: {count}", "Whitelisted: {count}", "Followers: {count}", "Unique Avatars: {count}", "OG Capsule HLDR's:", "Capsule HLDR's:"]
+client.vNames = ["Members: {count}", "Verified: {count}", "Capsule Whitelisted: {count}", "Followers: {count}", "Unique Avatars: {count}", "OG Capsule HLDR's: {count}", "Capsule HLDR's: {count}"]
 
 process.setMaxListeners(69);

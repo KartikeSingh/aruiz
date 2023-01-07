@@ -24,5 +24,7 @@ module.exports = {
                 }]
             }]
         });
+    
+        await user.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
     }
 }

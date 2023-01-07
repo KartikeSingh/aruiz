@@ -83,6 +83,7 @@ module.exports = {
 
             const userData = await user.findOne({ id: int.user.id, guild: int.guild.id }) || await user.create({ id: int.user.id, guild: int.guild.id });
             const item = await Items.findOne({ name: int.values[0], shop: items[0].shop });
+            await user.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
 
             interaction.editReply({
                 embeds: [{

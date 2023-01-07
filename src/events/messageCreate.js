@@ -8,6 +8,8 @@ module.exports = async (client, message) => {
 
     const userData = await users.findOne({ user: message.author.id, guild: message.guild.id }) || await users.create({ user: message.author.id, guild: message.guild.id });
 
+    await users.findOneAndUpdate({ user: message.author.id, guild: message.guild.id }, { lastMessage: Date.now() });
+
     if (userData.lastXP + (data.xpTimeout || 1000) > Date.now()) return;
     let xp = Math.floor(((Math.random() * (data.xpLimit.up - data.xpLimit.down)) + data.xpLimit.down) * data.xpRate),
         reqXP = 100;

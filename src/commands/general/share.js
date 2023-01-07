@@ -57,6 +57,9 @@ module.exports = {
             quantity = interaction.options.getInteger("quantity"),
             user1Data = await _user.findOne({ guild: interaction.guildId, id: interaction.user.id }) || await _user.create({ guild: interaction.guildId, id: interaction.user.id }),
             user2Data = await _user.findOne({ guild: interaction.guildId, id: user?.id }) || await _user.create({ guild: interaction.guildId, id: user?.id });
+
+        await _user.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
+
         if (option === "coin") {
             if (user1Data.balance < coins) return interaction.editReply({
                 embeds: [

@@ -1,1 +1,1 @@
-module.exports = async (username = "BlockPound_") =>0
+module.exports = async (username = "BlockPound_") => 0

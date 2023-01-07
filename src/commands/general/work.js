@@ -23,7 +23,7 @@ module.exports = {
 
         const max = 100, min = 20, reward = Math.floor(Math.random() * (max - min) + min);
 
-        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.work": Date.now() + 3600000 }, { new: true });
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.work": Date.now() + 3600000, lastCommand: Date.now() }, { new: true });
 
         interaction.editReply({
             embeds: [{

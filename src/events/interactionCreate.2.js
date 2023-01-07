@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton, MessageAttachment } = require('discord.js');
+const { Modal, TextInputComponent, MessageActionRow, MessageEmbed, MessageButton, MessageAttachment, ButtonInteraction } = require('discord.js');
 const avatar = require("../models/avatar");
 const botData = require("../models/data");
 const users = require("../models/user");
@@ -7,6 +7,12 @@ const createAvatar = require("../utility/createAvatar");
 
 const timeout = new Map();
 
+/**
+ * 
+ * @param {*} client 
+ * @param {ButtonInteraction} interaction 
+ * @returns 
+ */
 module.exports = async (client, interaction) => {
     if (!interaction.customId) return;
 
@@ -67,7 +73,7 @@ module.exports = async (client, interaction) => {
 
         const img = await axios.post("https://render.readyplayer.me/render", {
             model,
-            scene: "fullbody-posture-v1-transparent",
+            scene: "fullbody-portrait-v1",
             armature: gender === "feminine" ? "ArmatureTargetFemale" : "ArmatureTargetMale",
         }).then(x => x.data.renders[0]).catch((e) => console.log(e));
 
@@ -200,6 +206,8 @@ module.exports = async (client, interaction) => {
                 description: (guildData.balance || 0) + " Points"
             }]
         });
+
+        await users.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
     } else if (type === "work") {
         await interaction.deferReply({ ephemeral: true });
 
@@ -251,7 +259,7 @@ module.exports = async (client, interaction) => {
 
         const max = 52, min = 152, reward = Math.floor(Math.random() * (max - min) + min) + (5 * user.dailyStreak);
 
-        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1 }, { new: true });
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1, lastCommand:Date.now() }, { new: true });
 
         interaction.editReply({
             embeds: [{
@@ -277,7 +285,7 @@ module.exports = async (client, interaction) => {
             components: []
         });
 
-        await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: Date.now() + parseInt(id) * 3600000, workHour: parseInt(id) }, { new: true });
+        await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: Date.now() + parseInt(id) * 3600000, workHour: parseInt(id), lastCommand: Date.now() }, { new: true });
     } else if (type === "paycheck") {
         await interaction.deferReply({ ephemeral: true });
 
@@ -309,7 +317,7 @@ module.exports = async (client, interaction) => {
 
         const rawReward = Math.round(max * p),
             reward = (rawReward < min ? min : rawReward) * user.workHour;
-        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: 0, workHour: 0, $inc: { balance: reward } }, { new: true });
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: 0, workHour: 0, $inc: { balance: reward }, lastCommand: Date.now() }, { new: true });
 
         interaction.editReply({
             embeds: [{
@@ -326,5 +334,41 @@ module.exports = async (client, interaction) => {
                 description: `Claimed their paycheck of \`${reward}\` LB Coins!`
             }]
         }).catch(() => { })
+    } else if (type === "viewAssets") {
+        const roles = [].map((v, i) => {
+            return {
+                role: v,
+                index: i
+            }
+        }), assets = [];
+
+        const member = interaction.guild.members.cache.get(interaction.user.id),
+            userRoles = roles.filter(v => member.roles.cache.has(v.role)),
+            asset = [];
+
+        for (let i = 0; i < userRoles.length; i++)asset.push(assets[userRoles[i].index]);
+
+        interaction.reply({
+            ephemeral: true,
+            embeds: [{
+                colo: "YELLOW",
+                title: "🖼️ Your Assets",
+                description: asset.length === 0 ? "`No Assets`" : asset.map((v, i) => `\`${i + 1}.\` **${v}**`).join("\n")
+            }]
+        })
+    
+        await users.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
+    } else if (type === "verifyWallet") {
+
+        interaction.reply({
+            embeds: [{
+                colo: "YELLOW",
+                title: "👛 Wallet Verification",
+                description: "Use collab land bot for user verification!"
+            }],
+            ephemeral: true,
+        })
+   
+        await users.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
     }
 }

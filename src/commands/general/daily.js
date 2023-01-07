@@ -23,7 +23,7 @@ module.exports = {
 
         const max = 300, min = 200, reward = Math.floor(Math.random() * (max - min) + min) + (5 * user.dailyStreak);
 
-        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1 }, { new: true });
+        const newData = await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { $inc: { balance: reward }, "timeouts.daily": Date.now() + 24 * 3600000, dailyStreak: Date.now() - user.timeouts.daily > 32 * 3600000 ? 0 : user.dailyStreak + 1, lastCommand:Date.now() }, { new: true });
 
         interaction.editReply({
             embeds: [{

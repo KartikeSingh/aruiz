@@ -41,6 +41,12 @@ module.exports = {
                     name: "followers",
                     value: 3
                 }, {
+                    name: "OG holders",
+                    value: 5
+                }, {
+                    name: "holders",
+                    value: 6
+                }, {
                     name: "unique avatars",
                     value: 4
                 }]
@@ -84,20 +90,20 @@ module.exports = {
             });
         } else if (option === "add") {
 
-            if ((memberCount !== client.guilds.cache.get(data.guild).members.cache.size)) {
-                await client.guilds.cache.get(data.guild).members.fetch();
+
+            const count = [(await interaction.guild.fetch())?.memberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers(), (await botData.findOne({ id: client.user.id }))?.avatarsCreated];
+                      if ((count[0] !== client.guilds.cache.get(data.guild)?.members?.cache?.size)) {
+                await client.guilds.cache.get(data.guild)?.members?.fetch();
             }
 
             const g = client.guilds.cache.get(data.guild)
-
-            const count = [(await interaction.guild.fetch())?.approximateMemberCount, await avatar.countDocuments({}), 162 + ((await datax.findOne({ id: client.user.id }))?.whitelist?.length || 0), await getFollowers(), (await botData.findOne({ id: client.user.id }))?.avatarsCreated];
-
+          
             count.push(
-                g.members.cache.filter(v => v.roles.cache.has("1056674165110882305")),
-                g.members.cache.filter(v => v.roles.cache.has("1056335558856687766"))
+                g?.members?.cache?.filter(v => v.roles.cache.has("1056674165110882305"))?.size,
+                g?.members?.cache?.filter(v => v.roles.cache.has("1056335558856687766"))?.size
             );
 
-            channel.setName(client.vNames[type].replace("{count}", count[type]))
+            channel.setName(client.vNames[type].replace("{count}", count[type] ||0))
                 .then(async () => {
                     await stats.create({
                         guild: interaction.guildId,
@@ -113,7 +119,8 @@ module.exports = {
                         ]
                     })
                 })
-                .catch(() => {
+                .catch((e) => {
+              console.log(e)
                     interaction.editReply({
                         embeds: [
                             new MessageEmbed()

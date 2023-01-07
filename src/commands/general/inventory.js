@@ -26,6 +26,7 @@ module.exports = {
         const u = interaction.options.getUser("user") || interaction.user;
 
         const userData = await user.findOne({ id: u.id, guild: interaction.guild.id }) || await user.create({ id: u.id, guild: interaction.guild.id });
+        await user.findOneAndUpdate({ guild: interaction.guildId, id: interaction.user.id }, { lastCommand: Date.now() });
 
         if (userData.items.length === 0) return interaction.editReply({
             embeds: [{
