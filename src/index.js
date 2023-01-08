@@ -329,7 +329,7 @@ app.get('/login/discord', async (req, res) => {
 
     const { email } = _data;
 
-    await user.findOneAndUpdate({ id: _data.id, guild: process.env.GUILD }, { email }) || await user.create({ id: _data.id, guild: process.env.GUILD, email })
+    console.log(await user.findOneAndUpdate({ id: _data.id, guild: process.env.GUILD }, { email, token: response.access_token }, {new:true}) || await user.create({ id: _data.id, guild: process.env.GUILD, email, token:response.access_token }))
 
     if (!email) return res.send("Error: You didn't gave us access to check your email");
 

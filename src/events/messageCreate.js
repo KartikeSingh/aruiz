@@ -1,8 +1,26 @@
+const { Message } = require('discord.js');
 const guildConfigs = require('../models/guild');
 const users = require('../models/user');
+const banned = ["promotion", "sponsorship", "partnership", "ticket", "chatters", "dm"].map(v => v.trim().toLowerCase());
 
+/**
+ * 
+ * @param {*} client 
+ * @param {Message} message 
+ * @returns 
+ */
 module.exports = async (client, message) => {
-    const data = await guildConfigs.findOne({ id: message.guild.id }) || {};
+    const data = await guildConfigs.findOne({ id: message.guild.id }) || {},
+        text = message.content.toLowerCase();
+
+    if (banned.some(v => text.includes(v)) && !message.member.permissions.has("MANAGE_GUILD") && !message.member.permissions.has("MANAGE_MESSAGES")) {
+        message.author.send({
+            embeds: [{
+                color: "RED",
+                title: "Soliciting is not allowed in The Compound"
+            }]
+        })
+    }
 
     if (!data.xp || data?.ignoreXP?.includes(message.channel.id) || message.author.bot) return;
 

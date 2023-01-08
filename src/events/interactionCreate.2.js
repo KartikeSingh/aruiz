@@ -117,7 +117,7 @@ module.exports = async (client, interaction) => {
 
         client.oracle.forEach(id => client.channels.cache.get(id)?.send({
             embeds: [{
-                description: `${interaction.user.toString()} ${(!old || !old?.url) ? "created their very first avatar!" : "updated their avatar!"}`,
+                description: `${interaction.user.tag} ${(!old || !old?.url) ? "created their very first avatar!" : "updated their avatar!"}`,
                 image: {
                     url: img
                 }
@@ -191,7 +191,7 @@ module.exports = async (client, interaction) => {
 
         client.oracle.forEach(id => client.channels.cache.get(id)?.send({
             embeds: [{
-                description: `${interaction.user.toString()} just flexed their avatar in <#1052968945533059202>`,
+                description: `${interaction.user.tag} just flexed their avatar in <#1052968945533059202>`,
             }]
         }))
     } else if (type === "coins") {
@@ -286,6 +286,13 @@ module.exports = async (client, interaction) => {
         });
 
         await users.findOneAndUpdate({ id: interaction.user.id, guild: interaction.guild.id }, { claimWorkAt: Date.now() + parseInt(id) * 3600000, workHour: parseInt(id), lastCommand: Date.now() }, { new: true });
+
+        client.oc?.send({
+            embeds: [{
+                color: "RANDOM",
+                title: `🛠️ ${interaction.user.username} Started Working`,
+            }]
+        }).catch(() => { })
     } else if (type === "paycheck") {
         await interaction.deferReply({ ephemeral: true });
 

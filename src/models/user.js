@@ -7,6 +7,7 @@ module.exports = model('aruiz_bot_user', new Schema({
     items: [String],
     wantTo: [String],
     commitedTo: [String],
+    token: String,
     email: String,
     balance: {
         type: Number,

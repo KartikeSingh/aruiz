@@ -5,8 +5,10 @@ module.exports = async (client) => {
 
     client.guilds.cache.forEach(async guild => {
         const vanity = await guild.fetchVanityData().catch(() => { return {}; });
-        const invs = await guild.invites.fetch();
+        const invs = await guild.invites.fetch().catch(() => null);
 
+        if(!invs)return;
+      
         if (vanity.code) client.invites.set(vanity.code, vanity.uses);
         invs.forEach(inv => client.invites.set(inv.code, inv.uses))
     });
@@ -16,10 +18,4 @@ module.exports = async (client) => {
     statsUpdate(client);
 
     client.oc = client.channels.cache.get(process.env.ORACLE);
-
-    client.watchlist();
-
-    setInterval(() => {
-        client.watchlist();
-    }, 1800000)
 }

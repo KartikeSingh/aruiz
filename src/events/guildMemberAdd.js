@@ -5,8 +5,11 @@ module.exports = async (client, member) => {
 
     const invs = await member.guild.invites.fetch();
 
-    const invite = invs.filter(inv => inv.uses > client.invites.get(inv.code)).first(),
-        vanityData = await member.guild.fetchVanityData().catch(() => { return {}; }),
+    const invite = invs.filter(inv => inv.uses > client.invites.get(inv.code)).first();
+
+    if (!invite) return;
+
+    const vanityData = await member.guild.fetchVanityData().catch(() => { return {}; }),
         isVanity = client.invites.get(vanityData.code) > vanityData.uses;
 
     client.invites.set(invite.code, invite.uses);
@@ -15,12 +18,14 @@ module.exports = async (client, member) => {
         await userInvites.create({
             guild: member.guild.id,
             id: member.id,
-            invitedBy: isVanity ? "Vanity URL" : invite.inviterId,
+            invitedBy: (isVanity ? "Vanity URL" : invite?.inviterId) || "Unknown",
             joinedAt: Date.now()
         });
     }
 
-    if (!invite.inviterId || await userInvites.findOne({ guild: member.guild.id, invited: member.id })) return;
+    client.channels.cache.get(process.env.INVITE_CHANNEL)?.send(`${member.user.tag} has been invited by ${ isVanity ? "Vanity URL" : invite?.inviterId ? `<@${invite.inviterId}>` :"Unknown"}`)
+
+    if (!invite?.inviterId || await userInvites.findOne({ guild: member.guild.id, invited: member.id })) return;
 
     const mb = member.guild.members.cache.get(invite.inviterId) || await member.guild.members.fetch(invite.inviterId);
 
