@@ -1,7 +1,8 @@
 const { Message } = require('discord.js');
 const guildConfigs = require('../models/guild');
 const users = require('../models/user');
-const banned = ["promotion", "sponsorship", "partnership", "ticket", "chatters", "dm"].map(v => v.trim().toLowerCase());
+const getResponse = require('../utility/getResponse');
+const banned = ["promotion", "sponsorship", "partnership", "ticket", "chatter", "dm"].map(v => v.trim().toLowerCase());
 
 /**
  * 
@@ -19,7 +20,15 @@ module.exports = async (client, message) => {
                 color: "RED",
                 title: "Soliciting is not allowed in The Compound"
             }]
-        })
+        });
+
+        return await message.delete().catch(() => null);
+    }
+
+    if (message.channel.id === process.env.CHAT_CHANNEL && !message.author.bot) {
+        const response = await getResponse(message.content, message.author.id);
+
+        if (response) message.reply(response.trim());
     }
 
     if (!data.xp || data?.ignoreXP?.includes(message.channel.id) || message.author.bot) return;

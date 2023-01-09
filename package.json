@@ -28,7 +28,8 @@
     "get-twitter-followers": "^2.0.0",
     "got": "^12.5.3",
     "mongoose": "^6.6.7",
-    "ms-prettify": "^1.4.0"
+    "ms-prettify": "^1.4.0",
+    "openai": "^3.1.0"
   },
   "engines": {
     "node": "16.x.x"

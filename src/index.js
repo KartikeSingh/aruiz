@@ -9,7 +9,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => console.log("Database Connect
 // Discord Client Setup
 const Client = require('./utility/Client');
 
-const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MEMBERS"] });
+const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MEMBERS", "MESSAGE_CONTENT"] });
 
 client.login(process.env.TOKEN);
 
